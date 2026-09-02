@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.mikoshi.md.alfred.clear-notification</string>
+	<key>connections</key>
+	<dict>
+		<key>3A1B5AC2-5FF4-415A-B904-A232AD24DE61</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8C992B3E-8313-4F4C-BC90-CFD0B8D686B2</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>A7152596-31F6-4730-A967-DCD06FE567A0</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8C992B3E-8313-4F4C-BC90-CFD0B8D686B2</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>harryhan24</string>
+	<key>description</key>
+	<string>키워드 cl 로 화면에 떠 있는 알림 배너를 모두 닫는다</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>clear notification</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>cl</string>
+				<key>subtext</key>
+				<string>떠 있는 알림 모두 닫기</string>
+				<key>text</key>
+				<string>Clear notifications</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>A7152596-31F6-4730-A967-DCD06FE567A0</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>clear notification</string>
+				<key>subtext</key>
+				<string>떠 있는 알림 모두 닫기</string>
+				<key>text</key>
+				<string>Clear notifications</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>3A1B5AC2-5FF4-415A-B904-A232AD24DE61</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>applescript</key>
+				<string>-- 화면에 떠 있는 알림(배너 스택)을 전부 닫는다.
+-- NotificationCenter 프로세스의 배너 그룹이 노출하는 "Name:Clear All" / "Name:Close"
+-- 액션을 직접 perform 한다. 묶인 알림은 Clear All 이 한 번에 처리하므로 우선 시도.
+on alfred_script(q)
+	set cleared to 0
+	repeat 20 times
+		set didClear to false
+		try
+			tell application "System Events"
+				tell process "NotificationCenter"
+					if (exists window "Notification Center") then
+						set sa to scroll area 1 of group 1 of group 1 of window "Notification Center"
+						set els to UI elements of sa
+						if (count of els) &gt; 0 then
+							set acts to actions of (item 1 of els)
+							repeat with a in acts
+								if (name of a) starts with "Name:Clear All" then
+									perform a
+									set didClear to true
+									exit repeat
+								end if
+							end repeat
+							if not didClear then
+								repeat with a in acts
+									if (name of a) starts with "Name:Close" then
+										perform a
+										set didClear to true
+										exit repeat
+									end if
+								end repeat
+							end if
+						end if
+					end if
+				end tell
+			end tell
+		on error
+			-- 알림이 지워지는 중이면 UI 참조가 사라져 에러가 난다. 정상 종료로 취급.
+			set didClear to false
+		end try
+		if not didClear then exit repeat
+		set cleared to cleared + 1
+		delay 0.15
+	end repeat
+	return cleared
+end alfred_script
+</string>
+				<key>cachescript</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.applescript</string>
+			<key>uid</key>
+			<string>8C992B3E-8313-4F4C-BC90-CFD0B8D686B2</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>System Events 로 NotificationCenter 배너 그룹의 "Clear All"/"Close" 액션을 직접 perform 한다.
+Alfred 에 손쉬운 사용(Accessibility) 권한 필요.
+macOS UI 계층이 바뀌면 scroll area 1 of group 1 of group 1 of window "Notification Center" 경로를 갱신할 것.</string>
+	<key>uidata</key>
+	<dict>
+		<key>3A1B5AC2-5FF4-415A-B904-A232AD24DE61</key>
+		<dict>
+			<key>xpos</key>
+			<integer>60</integer>
+			<key>ypos</key>
+			<integer>190</integer>
+		</dict>
+		<key>8C992B3E-8313-4F4C-BC90-CFD0B8D686B2</key>
+		<dict>
+			<key>xpos</key>
+			<integer>380</integer>
+			<key>ypos</key>
+			<integer>120</integer>
+		</dict>
+		<key>A7152596-31F6-4730-A967-DCD06FE567A0</key>
+		<dict>
+			<key>xpos</key>
+			<integer>60</integer>
+			<key>ypos</key>
+			<integer>60</integer>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
+	<key>version</key>
+	<string>1.0</string>
+	<key>webaddress</key>
+	<string></string>
+</dict>
+</plist>
