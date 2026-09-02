@@ -19,6 +19,21 @@ It drives the Accessibility API directly: the `NotificationCenter` process expos
 
 ## Installation
 
+### 설치 / 재설치 (원라이너)
+
+```bash
+curl -sL https://git.ehdtn.com/harryhan24/clear-notification-for-alfred/raw/branch/main/scripts/install.sh | bash
+```
+
+- 최신 릴리스의 `.alfredworkflow`를 받아 Alfred workflows 폴더에 바로 풀어넣는다 — import 대화상자가 뜨지 않는다.
+- 재실행하면 기존 설치를 덮어쓴다.
+- 개발용 심링크(`install.sh`로 만든 것)가 이미 있으면 덮어쓰지 않고 거부한다.
+
+### 직접 import
+
+1. [Releases](https://git.ehdtn.com/harryhan24/clear-notification-for-alfred/releases)에서 `Clear-Notification-for-Alfred.alfredworkflow`를 받는다.
+2. 파일을 더블클릭해 Alfred에 import한다.
+
 ### 개발 체크아웃 연결
 
 repo를 클론한 뒤 심링크를 건다:

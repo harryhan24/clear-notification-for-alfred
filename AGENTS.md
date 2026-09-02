@@ -52,3 +52,13 @@ end tell'
 
 `window "Notification Center"`는 배너가 화면에 떠 있는 동안에만 존재한다. 배너가 사라진 뒤 조회하면
 `-1728`이 나는데 정상이다 — 프로브는 반드시 알림을 띄운 직후에 돌릴 것.
+
+## 릴리스
+
+`main`은 개발, `prod`가 빌드 브랜치다. `main` -> `prod` 로 승격 push 하면
+`.woodpecker/release.yml`이 `.alfredworkflow`를 zip으로 말아 Forgejo 릴리스로 올린다.
+
+- 태그는 `info.plist`의 `version`에서 딴다(`v1.0`). **같은 태그의 릴리스가 이미 있으면
+  파이프라인이 실패한다** — 릴리스 전에 `version`을 올릴 것.
+- zip에는 Alfred가 읽는 파일만 담는다(개발용 스크립트·문서 제외).
+- 사용자 설치는 `scripts/install.sh` 원라이너가 최신 릴리스를 받아 UUID 폴더에 직접 푼다.

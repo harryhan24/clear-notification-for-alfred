@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# 최신 릴리스의 .alfredworkflow를 받아 Alfred workflows 폴더에 바로 설치한다.
+# zip을 UUID 폴더로 직접 풀기 때문에 Alfred import 대화상자가 뜨지 않는다.
+#
+#   curl -sL https://git.ehdtn.com/harryhan24/clear-notification-for-alfred/raw/branch/main/scripts/install.sh | bash
+set -euo pipefail
+
+REPO="harryhan24/clear-notification-for-alfred"
+API="https://git.ehdtn.com/api/v1/repos/$REPO/releases/latest"
+
+ALFRED_WORKFLOWS="$HOME/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows"
+# Alfred는 폴더명으로 워크플로를 식별한다 — 이 UUID는 바꾸면 안 된다
+WORKFLOW_UUID="user.workflow.5B8B4561-C8EA-434E-A496-D9BC087258CE"
+TARGET="$ALFRED_WORKFLOWS/$WORKFLOW_UUID"
+
+if [ ! -d "$ALFRED_WORKFLOWS" ]; then
+  echo "error: Alfred workflows 폴더가 없습니다:" >&2
+  echo "  $ALFRED_WORKFLOWS" >&2
+  echo "Alfred를 설치하고 한 번 실행했는지 확인하세요." >&2
+  exit 1
+fi
+
+# 개발용 체크아웃 심링크(root install.sh가 만든 것)를 릴리스로 덮어쓰지 않는다
+if [ -L "$TARGET" ]; then
+  echo "error: 이미 개발 체크아웃이 링크돼 있습니다:" >&2
+  echo "  $TARGET -> $(readlink "$TARGET")" >&2
+  echo "릴리스 사본으로 바꾸려면 링크를 먼저 지우세요:" >&2
+  echo "  rm \"$TARGET\"" >&2
+  exit 1
+fi
+
+# Forgejo에는 GitHub식 releases/latest/download 단축 URL이 없어 API로 asset을 찾는다
+ASSET_URL=$(curl -sfL "$API" | python3 -c "
+import json, sys
+assets = json.load(sys.stdin)['assets']
+print(next(a['browser_download_url'] for a in assets if a['name'].endswith('.alfredworkflow')))
+")
+
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+echo "downloading: $ASSET_URL"
+curl -sfL "$ASSET_URL" -o "$TMP/workflow.zip"
+unzip -q "$TMP/workflow.zip" -d "$TMP/workflow"
+
+if [ -d "$TARGET" ]; then
+  echo "replacing existing install: $TARGET"
+fi
+rm -rf "$TARGET"
+cp -R "$TMP/workflow" "$TARGET"
+echo "installed: $TARGET"
+
+
+echo "Alfred에서 'cl' 키워드가 안 보이면 Alfred를 재시작하세요."
